@@ -5,6 +5,9 @@ import logoUser from '../logo-user.png';
 
 class Show extends Component {
 
+      //1
+      _isMounted = false;
+
   constructor(props) {
     super(props);
     this.state = {
@@ -14,9 +17,12 @@ class Show extends Component {
   }
 
   componentDidMount() {
-    const ref = firebase.firestore().collection('users').doc(this.props.match.params.id);
+
+    this._isMounted = true;
+
+    const ref = firebase.firestore().collection('contactos').doc(this.props.match.params.id);
     ref.get().then((doc) => {
-      if (doc.exists) {
+      if ( this._isMounted && doc.exists) {
         this.setState({
           user: doc.data(),
           key: doc.id,
@@ -29,9 +35,14 @@ class Show extends Component {
     });
   }
 
+      //1
+      componentWillUnmount() {
+        this._isMounted = false;
+      }
+
   delete(id){
     
-    firebase.firestore().collection('users').doc(id).delete().then(() => {
+    firebase.firestore().collection('contactos').doc(id).delete().then(() => {
       console.log("Borrado!");
       this.props.history.push("/")
     }).catch((error) => {

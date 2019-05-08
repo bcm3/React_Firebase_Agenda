@@ -4,23 +4,30 @@ import { Link } from 'react-router-dom';
 
 class Create extends Component {
 
+    //1
+    _isMounted = false;
+
   constructor() {
+    
     super();
-    this.ref = firebase.firestore().collection('users');
+    this.ref = firebase.firestore().collection('contactos');
     this.state = {
       nombre: '',
       apellidos: '',
       telefono: '',
       correo: '',
       direccion: '',
-      sexo: ''
+      sexo: '',
+      foto: ''
     };
     
   }
   onChange = (e) => {
     const state = this.state
     state[e.target.name] = e.target.value;
-    this.setState(state);
+    if (this._isMounted) {
+      this.setState(state);
+    }
   }
 
   onSubmit = (e) => {
@@ -45,12 +52,47 @@ class Create extends Component {
         sexo: ''
       });
       this.props.history.push("/")
+      console.log("Usuario insertado correctamente");
     })
     .catch((error) => {
-      console.error("Error", error);
+      console.error("Error en la inserción", error);
     });
   }
 
+  onUpload (event) {
+
+    const bd = firebase.firestore();
+
+    const file = event.target.files[0];
+    //tenemos el fichero vemos
+
+    const storageRef = firebase.storage().ref(`/fotos/${file.name}`)
+    const task=storageRef.put(file); 
+
+    task.on('state_change', snapshot =>{
+        let porcentaje = (snapshot.bytesTransferreed / snapshot.totalBytes) * 100;
+        this.setState({
+          uploadValue: porcentaje
+        })
+    }, error => {console.log(error.message)
+    }, () => {  this.setState({
+        uploadValue: 100,
+        picture: task.snapshot.downloadURL
+        //donde esta el fichero ubicado
+      });
+    });
+  }
+
+  //1
+  componentDidMount() {
+    this._isMounted = true;
+  }
+
+  //1
+  componentWillUnmount() {
+    this._isMounted = false;
+  }
+  
   render() {
     const { nombre, apellidos, telefono, direccion, correo, sexo } = this.state;
     return (
@@ -91,6 +133,10 @@ class Create extends Component {
                 <option onChange={this.onChange}>Hombre</option>
                 <option onChange={this.onChange}>Mujer</option>
               </select>
+              </div>
+              <div className="form-group">
+                <label htmlFor="title">Imagen:</label>
+                <input type="file" className="form-control" name="foto" onChange={this.onUpload} placeholder="Introduzca correo" />
               </div>
               <button type="submit" className="btn btn-success">Guardar</button>&nbsp;
               <button type="reset" className="btn btn-warning">Cancelar</button>

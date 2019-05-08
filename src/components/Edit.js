@@ -4,6 +4,9 @@ import { Link } from 'react-router-dom';
 
 class Edit extends Component {
 
+  //1
+  _isMounted = false;
+
   //constructor vacio con los campos de la tabla
   constructor(props) {
     super(props);
@@ -18,6 +21,10 @@ class Edit extends Component {
   }
 
   componentDidMount() {
+
+    //1
+    this._isMounted = true;
+
     const ref = firebase.firestore().collection('users').doc(this.props.match.params.id);
     ref.get().then((doc) => {
         if (doc.exists) {
@@ -39,6 +46,11 @@ class Edit extends Component {
     });
   }
 
+  //1
+  componentWillUnmount() {
+    this._isMounted = false;
+  }
+
   onChange = (e) => {
     //metodo para hacer el cambio de todos los imputs que estan en el formulario
     //con state controlamos el estado del imput todos los valores
@@ -53,7 +65,7 @@ class Edit extends Component {
 
     const { nombre, apellidos, direccion, telefono, sexo, correo } = this.state;
 
-    const updateRef = firebase.firestore().collection('users').doc(this.state.key);
+    const updateRef = firebase.firestore().collection('contactos').doc(this.state.key);
     updateRef.set({
       nombre,
       apellidos,
@@ -86,7 +98,7 @@ class Edit extends Component {
           <div className="panel-heading">
             <h2>Edicción de {this.state.nombre} {this.state.apellidos}</h2>
           </div>
-          <div className="panel-body">          
+          <div className="panel-body">
             <form onSubmit={this.onSubmit}>
               <div className="form-group">
                 <label htmlFor="title">Nombre:</label>

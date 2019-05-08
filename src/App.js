@@ -5,9 +5,14 @@ import firebase from './Firebase';
 import logoUser from './logo-user.png';
 
 class App extends Component {
+
+  //1
+  _isMounted = false;
+
   constructor(props) {
+    //pantalla principal
     super(props);
-    this.ref = firebase.firestore().collection('users');
+    this.ref = firebase.firestore().collection('contactos');
     this.unsubscribe = null;
     this.state = {
       users: [],
@@ -36,6 +41,9 @@ class App extends Component {
   }
 
   componentDidMount() {
+
+    //1
+    this._isMounted = true;
     this.unsubscribe = this.ref.onSnapshot(this.onCollectionUpdate);
 
     //login
@@ -43,6 +51,11 @@ class App extends Component {
       this.setState({ usuario });
     });
   }
+
+    //1
+    componentWillUnmount() {
+      this._isMounted = false;
+    }
 
   //METODO PARA REALIZAR LA AUTENTIFICACION
   handleAuth() {
@@ -59,10 +72,8 @@ class App extends Component {
     //Se encargar de salir de la app y desloguearse de google, sesion registrada previamente
     handleSalir() {
       firebase.auth().signOut().then(function() {
-        // Sign-out successful.
-        console.log("Salir");
+        console.log("Deconectado correctamente");
       }).catch(function(error) {
-        // An error happened.
         console.log(error);
       });
     }
@@ -72,30 +83,31 @@ class App extends Component {
         return(
           <div className="container">
           <div className="panel panel-default">
-          <Link to="#" onClick={this.handleSalir} className="btn btn-primary">Salir</Link>
+          <Link to="/create" className="btn btn-primary izquierda">Añadir Contacto</Link>
+          <Link to="#" onClick={this.handleSalir} className="btn btn-primary derecha">Salir</Link>
             <div className="panel-heading">
               <h3 className="panel-title">
                 Agenda de contactos
               </h3>
             </div>
             <div className="panel-body">
-              <Link to="/create" className="btn btn-primary">Añadir Contacto</Link>
               <table className="table table-stripe">
-                <thead>
+                <tbody>
                   <tr>
-                    <th></th>
-                    <th>Nombre</th>
-                    <th>Apellidos</th>
-                    <th>Teléfono</th>
-                    <th>Correo</th>
-                    <th>Dirección</th>
-                    <th>Sexo</th>
+                    <td> </td>
+                    <td><b>Nombre</b></td>
+                    <td><b>Apellidos</b></td>
+                    <td><b>Teléfono</b></td>
+                    <td><b>Correo</b></td>
+                    <td><b>Dirección</b></td>
+                    <td><b>Sexo</b></td>
                   </tr>
-                </thead>
+                </tbody>
                 <tbody>
                   {this.state.users.map(user =>
                     <tr>
-                      <Link to={`/show/${user.key}`}><img src={logoUser} alt="logo"/> </Link>
+                      {/* WARNING BUSCAR SOLUCION */}
+                      <Link to={`/show/${user.key}`}><img src={logoUser} alt="logo"/></Link>
                       <td>{user.nombre}</td>
                       <td>{user.apellidos}</td>
                       <td>{user.telefono}</td>
@@ -112,19 +124,27 @@ class App extends Component {
         );
 
       }return (
-      //si el usuario no esta logueado con llevara aquí
-      <Link to="#" onClick={this.handleAuth} className="btn btn-primary">Entrar</Link>
+      //si el usuario no esta logueado en la APP llevara aquí
+      <Link to="#" onClick={this.handleAuth} className="btn btn-primary">Usuario registrado google</Link>
       );
     }
 
     render() {
       return (
         <div className="App">
-          <div>{this.renderCompruebaUsuario()}</div>
+          <div className="App-header">
+            <h1>Bienvenido a tu agenda de contactos</h1>
+          </div>
+          <div className="App-Section">
+            {/* comprobar si un usuario esta loogueado */}
+            {this.renderCompruebaUsuario()}
+          </div>
+          <div className="App-Footer">
+            <p>Copyright - Borja Castaño Montes</p>
+          </div>
         </div>
       );
     }
-  
 }
 
 export default App;
